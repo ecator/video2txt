@@ -84,6 +84,10 @@ foreach ($file in $files) {
     Write-Host "  coder: $coder"
     Write-Host "  lang: $lang"
     $newFileName = uv run --directory $Video2TxtPath main.py -f $file.FullName -p $prompt -a -s 60 -e 300
+    if($? -eq $false -or $newFileName -eq "") {
+        Write-Host -ForegroundColor Yellow "  Get title failed, skip"
+        continue
+    }
     if ($episode -match "^\d+$") {
         $episode = "TV${episode}"
     }
