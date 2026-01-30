@@ -1,6 +1,6 @@
 from langchain_core.globals import set_debug
 import os
-from langchain_google_genai import ChatGoogleGenerativeAI
+import llm_factory
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -111,6 +111,7 @@ class LLMResponse(BaseModel):
     """
     AI回答
     """
+
     result: str = Field(description="The result of the AI response")
 
 
@@ -128,11 +129,7 @@ def ask_ai(video_data, prompt, temperature=0) -> LLMResponse:
     mime_type = "video/webm"
 
     # 初始化 LLM
-    llm = ChatGoogleGenerativeAI(
-        model=config.GOOGLE_MODEL,
-        api_key=config.GOOGLE_API_KEY,
-        temperature=temperature,
-    )
+    llm = llm_factory.get_llm(temperature=temperature)
     video_b64 = base64.b64encode(video_data).decode("utf-8")
     # 构建消息
     prompts = ChatPromptTemplate.from_messages(
@@ -146,13 +143,21 @@ def ask_ai(video_data, prompt, temperature=0) -> LLMResponse:
                         "type": "text",
                         "text": prompt,
                     },
-                    {"type": "media", "mime_type": mime_type, "data": video_b64},
+                    {"type": "media", "mime_type": mime_type, "data": video_b64}
+                    if config.LLM_PROVIDER == "google"
+                    else {
+                        "type": "video_url",
+                        "video_url": {"url": f"data:{mime_type};base64,{video_b64}"},
+                    },
                 ]
             ),
         ]
     )
     chain = prompts | llm.with_structured_output(LLMResponse)
-    print(f"Asking {config.GOOGLE_MODEL}...", file=sys.stderr, flush=True)
+    model_name = (
+        config.GOOGLE_MODEL if config.LLM_PROVIDER == "google" else config.OPENAI_MODEL
+    )
+    print(f"Asking {config.LLM_PROVIDER}/{model_name}...", file=sys.stderr, flush=True)
     response = chain.invoke({})
 
     return response
@@ -189,7 +194,11 @@ def main():
         sys.exit(1)
     with open(prompt_file, "r", encoding="utf-8") as f:
         prompt = f.read()
-    print(f"model: {config.GOOGLE_MODEL}", file=sys.stderr, flush=True)
+    model_name = (
+        config.GOOGLE_MODEL if config.LLM_PROVIDER == "google" else config.OPENAI_MODEL
+    )
+    print(f"provider: {config.LLM_PROVIDER}", file=sys.stderr, flush=True)
+    print(f"model: {model_name}", file=sys.stderr, flush=True)
     print(f"video_path: {video_path}", file=sys.stderr, flush=True)
     print(f"audio: {audio}", file=sys.stderr, flush=True)
     print(f"start_second: {start_second}", file=sys.stderr, flush=True)

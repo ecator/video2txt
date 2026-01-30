@@ -1,15 +1,14 @@
 # 概览
 
-基于 LangChain 和 Google Gemini 的视频内容分析工具，可以从视频中提取指定内容。
+基于 LangChain的视频内容分析工具，可以从视频中提取指定内容。
 
-> 不要问为什么是Gemini，因为[可以白嫖](https://aistudio.google.com/app/apikey)
+> 目前支持OpenAI和Google Gemini。
 
 做这个工具的最初目的其实是为了批量重命名柯南的视频文件，所以`sample`里面包含了一个批量重命名柯南视频的脚本。
 
 # 功能特点
 
 - 支持多种视频格式
-- 基于 LangChain 和 Google Gemini 进行视频内容分析
 - 支持自定义提示词
 - 包含视频预处理功能（裁剪、压缩）
 
@@ -18,6 +17,11 @@
 ```env
 GOOGLE_API_KEY=your_api_key_here
 GOOGLE_MODEL=gemini-1.5-flash
+# 如果使用OpenAI或者兼容API
+LLM_PROVIDER="openai"
+OPENAI_BASE_URL="https://api.moonshot.cn/v1"
+OPENAI_API_KEY="sk-your_api_key_here"
+OPENAI_MODEL="kimi-k2.5"
 ```
 
 # 使用示例
@@ -54,7 +58,8 @@ python main.py -f video_path -p prompt_file [-s start] [-e duration] [-w width] 
 
 ## 注意事项
 
-- 确保已配置正确的`Google API Key`
+- 确保已配置正确的`Google API Key`或者`OpenAI API Key`
+  - 如果是OpenAI兼容API，请确保`OPENAI_BASE_URL`配置正确
 - 视频预处理会生成临时文件在`temp`目录用于存放截取的视频片段，需要手动清理
 - 处理大文件时注意可能的超时
 - 不能保证100%准确
