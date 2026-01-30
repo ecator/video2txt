@@ -5,7 +5,9 @@ description = "把视频提交给AI分析输出文本结果的脚本"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "langchain>=1.2.7",
     "langchain-google-genai>=2.0.10",
+    "langchain-openai>=1.1.7",
     "moviepy>=2.1.2",
     "python-dotenv>=1.0.1",
 ]
