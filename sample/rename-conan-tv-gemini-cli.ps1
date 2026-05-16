@@ -100,7 +100,7 @@ foreach ($file in $files) {
     $tempFile = $tempFile.Replace("]", "\]")
     $tempFile = $tempFile.Replace("(", "\(")
     $tempFile = $tempFile.Replace(")", "\)")
-    "@$tempFile " | gemini -p $prompt -m gemini-2.5-flash | Set-Variable -Name newFileName
+    "@$tempFile " | gemini -p $prompt | Set-Variable -Name newFileName
     $newFileName
     Pop-Location
     if ($? -eq $false -or $newFileName -eq "") {
